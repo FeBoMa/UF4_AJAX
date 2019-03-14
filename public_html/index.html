@@ -9,54 +9,224 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
     </head>
     <body>
-        <div id="etiqueta"></div>
 
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Open modal for @mdo</button>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@fat">Open modal for @fat</button>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">Open modal for @getbootstrap</button>
+        <style>
+            #mapid { 
+                height: 500px;
+                width: 500px;
+                margin-left: 100px;
 
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
-            <div class="modal-dialog" role="document">
+
+
+            }
+        </style>
+
+
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Frecuencia</button>
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Stop</button>
+        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Play</button>
+
+
+
+        <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="exampleModalLabel">New message</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Frecuencia</h4>
                     </div>
                     <div class="modal-body">
-                        <form>
-                            <div class="form-group">
-                                <label for="recipient-name" class="control-label">Recipient:</label>
-                                <input type="text" class="form-control" id="recipient-name">
-                            </div>
-                            <div class="form-group">
-                                <label for="message-text" class="control-label">Message:</label>
-                                <textarea class="form-control" id="message-text"></textarea>
-                            </div>
-                        </form>
+                        <label>Introduce nueva frecuencia de actualización : </label><input id="num">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Send message</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        <button id="modalGuardar" type="button" class="btn btn-primary">Guardar</button>
                     </div>
                 </div>
+
             </div>
         </div>
 
+        <div id="myModal2" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">STOP</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label>CONFIRMA FINALIZAR SERVICIO  </label><input hidden id="num">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        <button id="modalGuardar2" type="button" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="myModal3" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">PLAY</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label>CONFIRMA REANUDAR SERVICIO  </label><input hidden id="num">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        <button id="modalGuardar3" type="button" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div style="background-color:lightblue;float:left;font-size: 20px;margin-right: 10px" id="etiqueta"></div>
+        <div id="contingut"></div>
+        <div id="mapid"></div>
+
+
+
+
+
+
+
+
         <script>
-            $('#exampleModal').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget) // Button that triggered the modal
-                var recipient = button.data('whatever') // Extract info from data-* attributes
-                // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-                // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-                var modal = $(this)
-                modal.find('.modal-title').text('New message to ' + recipient)
-                modal.find('.modal-body input').val(recipient)
+
+
+//DATOS
+            var frequenciaActualitzacio = 3;
+            var intervalId;
+            var data;
+
+            function startInterval(_interval) {
+                //inicialitzem
+
+                intervalId = setInterval(consultaDades, _interval * 1000); //actualitzem dades cada quan toqui....
+                //actualitzaDades();
+                document.getElementById("etiqueta").innerHTML = "Frecuencia de actualización actual :  " + _interval;
+
+            }
+
+            startInterval(3);
+
+            function getInterval() {
+                return frequenciaActualitzacio;
+            }
+
+            //BOTONES DATOS       
+
+
+            $("#modalGuardar").click(function () {
+
+                data = $("#num").val();
+                frequenciaActualitzacio = data;
+                clearInterval(intervalId);
+                startInterval(frequenciaActualitzacio);
+
+                $("#myModal").modal("hide");
             })
+
+            $("#modalGuardar2").click(function () {
+
+                data = 0;
+                frequenciaActualitzacio = data;
+                clearInterval(intervalId);
+                startInterval(frequenciaActualitzacio);
+
+                $("#myModal2").modal("hide");
+            })
+
+            $("#modalGuardar3").click(function () {
+
+                data = 3;
+                frequenciaActualitzacio = data;
+                clearInterval(intervalId);
+                startInterval(frequenciaActualitzacio);
+
+                $("#myModal3").modal("hide");
+            })
+
+
+
+
+
+
+
+//var dadesRebudes = {};
+            var lastUpdateTime = 0;
+            function consultaDades() {
+                //alert("fede");
+                $.ajax({url: 'http://wservice.viabicing.cat/v2/stations?format=json'})//http://wservice.viabicing.cat/v1/getstations.php?v=2?callback=?'})
+                        .done(function (data) {
+                            console.log("ok");
+                            console.log(data);
+                            if (data.updateTime != lastUpdateTime)
+                            {
+                                lastUpdateTime = data.updateTime;
+                                actualitzaDadesPantalla(data);
+                            }
+                        })
+                        .fail(function (jqXHR, text, errorThrown) {
+                            console.log(jqXHR + "---" + text + "---" + errorThrown);
+                            console.log(jqXHR);
+                        })
+                        .always(function (x) {
+                            console.log("Fí")
+                        });
+            }
+
+            function actualitzaDadesPantalla(data)
+            {
+                arrayTipus = [];
+                arrayBicisPerTipus = [];
+                arraySlots = [];
+                var linea = "<p>Nova actualització <strong>" + lastUpdateTime + "</strong>";
+                //recorro array i vaig posant ja dades
+                for (i = 0; i < data.stations.length; i++)
+                {
+                    isNaN(arrayTipus[data.stations[i].type]) ? arrayTipus[data.stations[i].type] = 0 : arrayTipus[data.stations[i].type]++;
+                    isNaN(arrayBicisPerTipus[data.stations[i].type]) ? arrayBicisPerTipus[data.stations[i].type] = parseInt(data.stations[i].bikes) : arrayBicisPerTipus[data.stations[i].type] += parseInt(data.stations[i].bikes);
+                    isNaN(arraySlots[data.stations[i].type]) ? arraySlots[data.stations[i].type] = parseInt(data.stations[i].slots) : arraySlots[data.stations[i].type] += parseInt(data.stations[i].slots);
+                }
+                for (tipo in arrayTipus)
+                {
+                    linea = linea + "<br>Estació tipus:" + tipo + " hi ha <strong>" + arrayTipus[tipo] + "</strong> estacions amb <strong>" + arrayBicisPerTipus[tipo] + "</strong> bicis disponibles i <strong>" + arraySlots[tipo] + "</strong> slots lliures.";
+                }
+                //afegueixo contingut dins html
+                $("#contingut").append(linea + "</p>");
+            }
+
+
+            var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                maxZoom: 18,
+                id: 'mapbox.streets',
+                accessToken: 'your.mapbox.access.token'
+            }).addTo(mymap);
+
+
+
+
 
         </script>
 
