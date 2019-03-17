@@ -14,26 +14,19 @@ and open the template in the editor.
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
-    </head>
-    <body>
-
         <style>
             #mapid { 
                 height: 500px;
                 width: 500px;
                 margin-left: 100px;
-
-
-
             }
         </style>
 
-
+    </head>
+    <body>
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Frecuencia</button>
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Stop</button>
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Play</button>
-
-
 
         <div id="myModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -97,21 +90,10 @@ and open the template in the editor.
 
             </div>
         </div>
-
         <div style="background-color:lightblue;float:left;font-size: 20px;margin-right: 10px" id="etiqueta"></div>
         <div id="contingut"></div>
         <div id="mapid"></div>
-
-
-
-
-
-
-
-
         <script>
-
-
 //DATOS
             var frequenciaActualitzacio = 3;
             var intervalId;
@@ -167,10 +149,6 @@ and open the template in the editor.
 
 
 
-
-
-
-
 //var dadesRebudes = {};
             var lastUpdateTime = 0;
             function consultaDades() {
@@ -217,19 +195,16 @@ and open the template in the editor.
 
 
             var mymap = L.map('mapid').setView([51.505, -0.09], 13);
-            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            L.tileLayer('https://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png', {
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
                 maxZoom: 18,
                 id: 'mapbox.streets',
                 accessToken: 'your.mapbox.access.token'
             }).addTo(mymap);
 
-
-
-
-
+            L.marker([51.5, -0.09]).addTo(mymap)
+                    .bindPopup('David no esta aquí')
+                    .openPopup();
         </script>
-
-
     </body>
 </html>
