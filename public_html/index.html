@@ -14,6 +14,8 @@ and open the template in the editor.
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
         <style>
             #mapid { 
                 height: 500px;
@@ -93,6 +95,29 @@ and open the template in the editor.
         <div style="background-color:lightblue;float:left;font-size: 20px;margin-right: 10px" id="etiqueta"></div>
         <div id="contingut"></div>
         <div id="mapid"></div>
+
+        <div id="piechart_3d" style="width: 900px; height: 500px;"></div>
+
+        <script type="text/javascript">
+            google.charts.load("current", {packages: ["corechart"]});
+            google.charts.setOnLoadCallback(drawChart);
+            function drawChart(BIKE, ELECTRIC) {
+                var data = google.visualization.arrayToDataTable([
+                    ['Bike type', 'Quantity'],
+                    ['BIKE', BIKE],
+                    ['BIKE-ELECTRIC', ELECTRIC]
+                ]);
+
+                var options = {
+                    title: 'Quantitat d\'estacions per tipus',
+                    is3D: true,
+                };
+
+                var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+                chart.draw(data, options);
+            }
+        </script>
+
         <script>
 //DATOS
             var frequenciaActualitzacio = 3;
@@ -157,7 +182,7 @@ and open the template in the editor.
                         .done(function (data) {
                             console.log("ok");
                             console.log(data);
-                            if (data.updateTime != lastUpdateTime)
+                            if (data.updateTime !== lastUpdateTime)
                             {
                                 lastUpdateTime = data.updateTime;
                                 actualitzaDadesPantalla(data);
@@ -174,6 +199,8 @@ and open the template in the editor.
 
             function actualitzaDadesPantalla(data)
             {
+                var Normal = 0;
+                var Electrica = 0;
                 arrayTipus = [];
                 arrayBicisPerTipus = [];
                 arraySlots = [];
@@ -191,6 +218,8 @@ and open the template in the editor.
                 }
                 //afegueixo contingut dins html
                 $("#contingut").append(linea + "</p>");
+                //Datos del diagrama
+                drawChart(Normal, Electrica);
             }
 
 
