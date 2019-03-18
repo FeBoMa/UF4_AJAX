@@ -107,12 +107,10 @@ and open the template in the editor.
                     ['BIKE', BIKE],
                     ['BIKE-ELECTRIC', ELECTRIC]
                 ]);
-
                 var options = {
                     title: 'Quantitat d\'estacions per tipus',
-                    is3D: true,
+                    is3D: true
                 };
-
                 var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
                 chart.draw(data, options);
             }
@@ -123,18 +121,15 @@ and open the template in the editor.
             var frequenciaActualitzacio = 3;
             var intervalId;
             var data;
-
             function startInterval(_interval) {
                 //inicialitzem
 
                 intervalId = setInterval(consultaDades, _interval * 1000); //actualitzem dades cada quan toqui....
                 //actualitzaDades();
                 document.getElementById("etiqueta").innerHTML = "Frecuencia de actualización actual :  " + _interval;
-
             }
 
             startInterval(3);
-
             function getInterval() {
                 return frequenciaActualitzacio;
             }
@@ -148,7 +143,6 @@ and open the template in the editor.
                 frequenciaActualitzacio = data;
                 clearInterval(intervalId);
                 startInterval(frequenciaActualitzacio);
-
                 $("#myModal").modal("hide");
             })
 
@@ -158,7 +152,6 @@ and open the template in the editor.
                 frequenciaActualitzacio = data;
                 clearInterval(intervalId);
                 startInterval(frequenciaActualitzacio);
-
                 $("#myModal2").modal("hide");
             })
 
@@ -168,7 +161,6 @@ and open the template in the editor.
                 frequenciaActualitzacio = data;
                 clearInterval(intervalId);
                 startInterval(frequenciaActualitzacio);
-
                 $("#myModal3").modal("hide");
             })
 
@@ -178,6 +170,7 @@ and open the template in the editor.
             var lastUpdateTime = 0;
             function consultaDades() {
                 //alert("fede");
+
                 $.ajax({url: 'http://wservice.viabicing.cat/v2/stations?format=json'})//http://wservice.viabicing.cat/v1/getstations.php?v=2?callback=?'})
                         .done(function (data) {
                             console.log("ok");
@@ -201,6 +194,16 @@ and open the template in the editor.
             {
                 var Normal = 0;
                 var Electrica = 0;
+
+                var mymap = L.map('mapid').setView([41.3968, 2.1712], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png', {
+                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                    maxZoom: 18,
+                    id: 'mapbox.streets',
+                    accessToken: 'your.mapbox.access.token'
+                }).addTo(mymap);
+
+
                 arrayTipus = [];
                 arrayBicisPerTipus = [];
                 arraySlots = [];
@@ -209,6 +212,19 @@ and open the template in the editor.
                 for (i = 0; i < data.stations.length; i++)
                 {
                     isNaN(arrayTipus[data.stations[i].type]) ? arrayTipus[data.stations[i].type] = 0 : arrayTipus[data.stations[i].type]++;
+
+                    if (data.stations[i].type == "BIKE") {
+
+                        Normal++;
+                    } else if (data.stations[i].type == "BIKE-ELECTRIC") {
+                        Electrica++;
+                    }
+
+
+                    L.marker([data.stations[i].latitude, data.stations[i].longitude]).addTo(mymap)
+                            .bindPopup(data.stations[i].streetName)
+                            .openPopup();
+
                     isNaN(arrayBicisPerTipus[data.stations[i].type]) ? arrayBicisPerTipus[data.stations[i].type] = parseInt(data.stations[i].bikes) : arrayBicisPerTipus[data.stations[i].type] += parseInt(data.stations[i].bikes);
                     isNaN(arraySlots[data.stations[i].type]) ? arraySlots[data.stations[i].type] = parseInt(data.stations[i].slots) : arraySlots[data.stations[i].type] += parseInt(data.stations[i].slots);
                 }
@@ -216,6 +232,8 @@ and open the template in the editor.
                 {
                     linea = linea + "<br>Estació tipus:" + tipo + " hi ha <strong>" + arrayTipus[tipo] + "</strong> estacions amb <strong>" + arrayBicisPerTipus[tipo] + "</strong> bicis disponibles i <strong>" + arraySlots[tipo] + "</strong> slots lliures.";
                 }
+
+
                 //afegueixo contingut dins html
                 $("#contingut").append(linea + "</p>");
                 //Datos del diagrama
@@ -223,17 +241,7 @@ and open the template in the editor.
             }
 
 
-            var mymap = L.map('mapid').setView([51.505, -0.09], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png', {
-                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-                maxZoom: 18,
-                id: 'mapbox.streets',
-                accessToken: 'your.mapbox.access.token'
-            }).addTo(mymap);
 
-            L.marker([51.5, -0.09]).addTo(mymap)
-                    .bindPopup('David no esta aquí')
-                    .openPopup();
         </script>
     </body>
 </html>
